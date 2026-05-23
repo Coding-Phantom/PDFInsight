@@ -4,17 +4,16 @@
 import sqlite3
 from pathlib import Path
 
-
+# Initialize db connection
 def get_connection(db_path: Path) -> sqlite3.Connection:
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     return connection
 
-
 def initialize_database(db_path: Path) -> None:
     db_path.parent.mkdir(exist_ok=True) # make sure parent directory exists
 
-    with get_connection(db_path) as connection: # connect to db
+    with get_connection(db_path) as connection: # connect to database
         connection.execute( # create table of id, filename, file path, time/day created
             """
             CREATE TABLE IF NOT EXISTS pdfs (
