@@ -10,7 +10,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 
 COLLECTION_NAME = "pdf_chunks"
-EMBEDDING_MODEL = "models/gemini-embedding-001"
+EMBEDDING_MODEL = "models/gemini-embedding-001" # change model if needed
 CHAT_MODEL = "gemini-3.5-flash"
 
 
