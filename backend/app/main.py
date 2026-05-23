@@ -91,17 +91,6 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/debug-config")
-def debug_config() -> dict[str, str]:
-    return {"embedding_model": EMBEDDING_MODEL}
-
-# testing gemini api
-@app.get("/gemini-test")
-def gemini_test() -> dict[str, str]:
-    model = ChatGoogleGenerativeAI(model="gemini-3.5-flash")
-    response = model.invoke("Reply with one short sentence: Gemini is connected.")
-    return {"message": normalize_model_message(response.content)}
-
 
 # obtain pdf list from database to show whats available in frontend
 @app.get("/pdfs", response_model=list[PDFRecord])
