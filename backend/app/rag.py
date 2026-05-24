@@ -101,6 +101,13 @@ def answer_question_with_context(question: str, context_documents: list[Document
 You are a helpful assistant answering questions about uploaded PDFs.
 Use only the context below. If the answer is not in the context, say you do not know.
 
+Use proper markdown formatting:
+- Use bullet points
+- Use spacing between sections
+- Bold important move names
+- Make the answer readable
+- Be concise
+
 Context:
 {context}
 
