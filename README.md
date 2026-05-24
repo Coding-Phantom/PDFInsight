@@ -32,4 +32,28 @@ A full-stack **Retrieval-Augmented Generation (RAG)** web application that allow
 
 ---
 
-## ⚙️ Architecture
+## ⚙️ Installation
+
+**Create new virtual environment and activate it**
+
+python -m venv venv
+
+venv\Scripts\activate
+
+
+**Install dependencies**
+
+pip install -r requirements.txt
+
+
+**Create env file to store your API key (project does not include API key for obvious reasons**
+
+GEMINI_API_KEY=your_api_key_here
+
+**Run backend and frontend**
+
+python .\main.py (backend)
+
+npm run dev (frontend)
+
+
