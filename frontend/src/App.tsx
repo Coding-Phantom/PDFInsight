@@ -8,6 +8,8 @@ import {
   type PdfRecord,
 } from './api'
 
+import ReactMarkdown from 'react-markdown'
+
 function App() {
   const [pdfs, setPdfs] = useState<PdfRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -224,9 +226,9 @@ function App() {
 
         {askResult ? (
           <section className="rounded bg-gray-800 p-4">
-            <p className="whitespace-pre-line font-mono text-sm leading-6 text-gray-100">
-              {askResult.answer}
-            </p>
+            <div className="prose prose-invert max-w-none font-mono text-sm">
+              <ReactMarkdown>{askResult.answer}</ReactMarkdown>
+            </div>
 
             {askResult.sources.length > 0 ? (
               <div className="mt-5 border-t border-gray-700 pt-4">
