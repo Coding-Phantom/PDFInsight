@@ -32,7 +32,7 @@ A full-stack **Retrieval-Augmented Generation (RAG)** web application that allow
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 
 ### Create and activate virtual environment
@@ -59,7 +59,7 @@ GEMINI_API_KEY=your_api_key_here
 
 Note: API key is not included in the project for security reasons.
 
-🚀 Run the project
+Run the project
 
 
 
