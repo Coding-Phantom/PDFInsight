@@ -109,6 +109,7 @@ Use proper markdown formatting:
 - Be concise
 - Always format as bullet points with proper line breaks between items. Add another line break if needed for readability.
 - Never use long paragraphs for multiple items.
+- Format output in clean Markdown. Use blank lines between bullet sections and paragraphs. Do not rely on single line breaks.
 
 Context:
 {context}

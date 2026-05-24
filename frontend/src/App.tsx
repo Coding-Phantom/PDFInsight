@@ -10,6 +10,7 @@ import {
 
 import ReactMarkdown from 'react-markdown'
 
+// state for pdfs, loading, uploading, deleting, selection, question, result, asking, error
 function App() {
   const [pdfs, setPdfs] = useState<PdfRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -22,7 +23,7 @@ function App() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    async function loadPdfs() {
+    async function loadPdfs() { // load pdfs from API
       try {
         const pdfList = await getPdfs()
         setPdfs(pdfList)
@@ -41,6 +42,8 @@ function App() {
     loadPdfs()
   }, [])
 
+
+  // upload pdf
   async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) {
@@ -66,6 +69,7 @@ function App() {
     }
   }
 
+  // delete pdf
   async function handleDelete(pdfId: string) {
     setError('')
     setDeletingPdfId(pdfId)
@@ -85,6 +89,8 @@ function App() {
     }
   }
 
+
+  // set checkbox selection for pdfs, toggle on/off for context
   function togglePdfSelection(pdfId: string) {
     setSelectedPdfIds((currentIds) =>
       currentIds.includes(pdfId)
@@ -93,6 +99,7 @@ function App() {
     )
   }
 
+  // question ask (handle other cases if needed)
   async function handleAsk() {
     const trimmedQuestion = question.trim()
     if (!trimmedQuestion) {
@@ -127,8 +134,14 @@ function App() {
     <main className="min-h-screen bg-gray-900 p-6 text-white">
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="mb-6 text-center font-mono text-4xl font-bold text-red-200">
-          Retrieval Augmented Generation Chat
+          PDFInsight
         </h1>
+
+        {error ? (
+          <div className="mb-4 rounded border border-red-500 bg-red-950 px-4 py-3 font-mono text-sm text-red-200">
+            {error}
+          </div>
+        ) : null}
 
         <section className="mb-6 rounded bg-gray-800 p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -156,15 +169,12 @@ function App() {
             <p className="font-mono text-sm text-gray-400">Loading PDFs...</p>
           ) : null}
 
-          {error ? (
-            <p className="font-mono text-sm text-red-300">{error}</p>
-          ) : null}
 
-          {!isLoading && !error && pdfs.length === 0 ? (
+          {!isLoading && pdfs.length === 0 ? (
             <p className="font-mono text-sm text-gray-400">No PDFs found.</p>
           ) : null}
 
-          {!isLoading && !error && pdfs.length > 0 ? (
+          {!isLoading && pdfs.length > 0 ? (
             <ul className="space-y-2">
               {pdfs.map((pdf) => (
                 <li
@@ -203,7 +213,7 @@ function App() {
 
         <section className="mb-4 flex gap-2">
           <input
-            className="min-w-0 flex-1 rounded border border-gray-700 bg-gray-800 p-3 font-mono text-sm text-white outline-none placeholder:text-gray-500 focus:border-blue-500"
+            className="min-w-0 flex-1 rounded border border-gray-700 bg-gray-800 p-3 font-mono text-base text-white outline-none placeholder:text-gray-500 focus:border-blue-500"
             type="text"
             placeholder="Ask something..."
             value={question}
@@ -214,7 +224,7 @@ function App() {
             type="button"
             onClick={handleAsk}
             disabled={isAsking}
-            className="rounded bg-blue-600 px-5 py-3 font-mono text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
+            className="rounded bg-blue-600 px-5 py-3 font-mono text-base font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
           >
             {isAsking ? 'Asking...' : 'Ask'}
           </button>
@@ -226,7 +236,7 @@ function App() {
 
         {askResult ? (
           <section className="rounded bg-gray-800 p-4">
-            <div className="prose prose-invert max-w-none font-mono text-sm">
+            <div className="prose prose-invert max-w-none font-mono text-lg leading-6">
               <ReactMarkdown>{askResult.answer}</ReactMarkdown>
             </div>
 
