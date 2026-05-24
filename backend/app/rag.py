@@ -107,6 +107,8 @@ Use proper markdown formatting:
 - Bold important move names
 - Make the answer readable
 - Be concise
+- Always format as bullet points with proper line breaks between items. Add another line break if needed for readability.
+- Never use long paragraphs for multiple items.
 
 Context:
 {context}

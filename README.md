@@ -1,47 +1,35 @@
-# PDF RAG Web App
+# 📄 RAG PDF App (Retrieval-Augmented Generation)
 
-A small FastAPI + React + Tailwind CSS project for asking questions about uploaded PDF context.
+A full-stack **Retrieval-Augmented Generation (RAG)** web application that allows users to upload PDFs and ask questions about the content they upload. The system uses embeddings + vector search to retrieve relevant context and generate AI-powered answers using Google Gemini.
 
-## Project Shape
+---
 
-- `backend/` - FastAPI app and PDF/RAG logic
-- `frontend/` - React + Tailwind user interface
+## 🚀 Features
 
-## First Milestone
+- 📁 Upload and manage PDF documents
+- 🤖 Ask questions about uploaded PDFs
+- 🧠 Responses using Gemini LLM, with given context chunks
+- 📌 List source citations used in context for AI response
+- 🗂️ Can select/deselect from multiple PDFs to add/remove context for the LLM to read
 
-This version is intentionally simple:
+---
 
-- The backend exposes health, PDF list, toggle, and ask endpoints.
-- The frontend shows PDFs, lets users include or remove each one from context, and sends a question.
-- The answer endpoint returns a placeholder response so we can wire up the app before adding embeddings.
+## 🧠 Tech Stack
 
-## Backend
+### Backend
+- **FastAPI** – REST API server
+- **LangChain** – document processing + RAG pipeline
+- **Google Gemini API** – LLM + embeddings
+- **ChromaDB** – vector database
+- **SQLite** – PDF metadata storage
+- **PyPDFLoader** – PDF text extraction
 
-```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
+### Frontend
+- **React (TypeScript)**
+- **Tailwind CSS**
+- **React Markdown** – formatted AI responses
+- **Fetch API** – backend communication
 
-If PowerShell blocks activation scripts, use:
+---
 
-```powershell
-.\.venv\Scripts\python -m pip install -r requirements.txt
-.\.venv\Scripts\python -m uvicorn app.main:app --reload --port 8000
-```
-
-## Frontend
-
-```powershell
-cd frontend
-npm.cmd install
-npm.cmd run dev
-```
-
-Then open the local URL shown by Vite, usually `http://localhost:5173`.
-
-## Next Milestone
-
-Next we can add real PDF upload and text extraction, then chunking, embeddings, and retrieval.
+## ⚙️ Architecture
