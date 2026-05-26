@@ -11,12 +11,15 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import uvicorn
 
 # database imports
+from db import create_chat_history_entry
 from db import create_pdf_record
 from db import create_user
+from db import delete_chat_history_entry
 from db import delete_pdf_record
 from db import get_pdf_record
 from db import get_user_by_username
 from db import initialize_database
+from db import list_chat_history
 from db import list_pdf_records
 
 # auth imports
@@ -98,6 +101,15 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+# chat history model
+class ChatHistoryEntryModel(BaseModel):
+    id: str
+    question: str
+    answer: str
+    sources: str
+    pdf_ids: str
+    created_at: str
 
 # make all text into string for consistency
 def normalize_model_message(message: object) -> str:
@@ -268,6 +280,25 @@ def view_pdf_file(
     )
 
 
+# list chat history for current user
+@app.get("/history", response_model=list[ChatHistoryEntryModel])
+def get_chat_history(current_user: dict[str, str] = Depends(get_current_user)) -> list[dict[str, str]]:
+    return list_chat_history(DB_PATH, current_user["username"])
+
+
+# delete chat history entry
+@app.delete("/history/{entry_id}")
+def delete_chat_history(
+    entry_id: str,
+    current_user: dict[str, str] = Depends(get_current_user),
+) -> dict[str, str]:
+    result = delete_chat_history_entry(DB_PATH, entry_id, current_user["username"])
+    if result is None:
+        raise HTTPException(status_code=404, detail="History entry not found")
+
+    return {"status": "deleted", "entry_id": entry_id}
+
+
 # Gemini Ask Question API (non streamed)
 @app.post("/ask", response_model=AskResponse)
 def ask_question(
@@ -339,9 +370,11 @@ def ask_question_stream(
     if not context_documents:
         raise HTTPException(status_code=404, detail="No matching context found")
 
-    # Answer is streamed back as
     def generate():
+        full_answer = []
+
         for token in stream_answer_with_context(question, context_documents):
+            full_answer.append(token)
             yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
 
         sources = [
@@ -355,6 +388,15 @@ def ask_question_stream(
         ]
         yield f"data: {json.dumps({'type': 'sources', 'content': sources})}\n\n"
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        create_chat_history_entry(
+            DB_PATH,
+            current_user["username"],
+            question,
+            "".join(full_answer),
+            json.dumps(sources),
+            json.dumps(request.pdf_ids),
+        )
 
     return StreamingResponse(generate(), media_type="text/event-stream")
 

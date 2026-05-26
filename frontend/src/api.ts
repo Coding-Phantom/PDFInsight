@@ -71,6 +71,15 @@ export type LoginResponse = {
   token_type: string
 }
 
+export type ChatHistoryEntry = {
+  id: string
+  question: string
+  answer: string
+  sources: string
+  pdf_ids: string
+  created_at: string
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => null)
 
@@ -152,6 +161,18 @@ export async function askQuestion(
   })
 
   return parseResponse<AskResponse>(response)
+}
+
+export async function getHistory(): Promise<ChatHistoryEntry[]> {
+  const response = await authFetch(`${API_URL}/history`)
+  return parseResponse<ChatHistoryEntry[]>(response)
+}
+
+export async function deleteHistoryEntry(id: string): Promise<void> {
+  const response = await authFetch(`${API_URL}/history/${id}`, {
+    method: 'DELETE',
+  })
+  await parseResponse<{ status: string; entry_id: string }>(response)
 }
 
 export async function streamAskQuestion(
