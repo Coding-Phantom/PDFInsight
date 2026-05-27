@@ -146,7 +146,7 @@ export default function Dashboard() {
   function handleHistoryClick(entry: ChatHistoryEntry) {
     setStreamingAnswer(entry.answer)
     setAnswerSources(JSON.parse(entry.sources))
-    setQuestion('')
+    setQuestion(entry.question)
     setSelectedHistoryId(entry.id)
   }
 
