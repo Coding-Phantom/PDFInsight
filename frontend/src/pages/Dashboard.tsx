@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [selectedHistoryId, setSelectedHistoryId] = useState('')
   const [sourceError, setSourceError] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [dragOver, setDragOver] = useState(false)
   const [usage, setUsage] = useState<{ count: number; limit: number } | null>(null)
 
   useEffect(() => {
@@ -78,12 +79,7 @@ export default function Dashboard() {
     loadUsage()
   }, [])
 
-  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) {
-      return
-    }
-
+  async function uploadFile(file: File) {
     setError('')
     setIsUploading(true)
 
@@ -92,7 +88,6 @@ export default function Dashboard() {
       setPdfs((currentPdfs) => [result.pdf, ...currentPdfs])
       setSelectedPdfIds((currentIds) => [result.pdf.id, ...currentIds])
       getUsage().then(setUsage).catch(() => {})
-      event.target.value = ''
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -102,6 +97,42 @@ export default function Dashboard() {
     } finally {
       setIsUploading(false)
     }
+  }
+
+  async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    await uploadFile(file)
+    event.target.value = ''
+  }
+
+  function handleDragOver(event: React.DragEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+    setDragOver(true)
+  }
+
+  function handleDragLeave(event: React.DragEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+    setDragOver(false)
+  }
+
+  function handleDrop(event: React.DragEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+    setDragOver(false)
+
+    const file = event.dataTransfer.files?.[0]
+    if (!file) return
+
+    if (file.type !== 'application/pdf') {
+      setError('Only PDF files are accepted.')
+      return
+    }
+
+    uploadFile(file)
   }
 
   async function handleDelete(pdfId: string) {
@@ -315,7 +346,13 @@ export default function Dashboard() {
             PDFInsight
           </h1>
 
-          <section className="mb-6 rounded bg-gray-800 p-4">
+          <section
+            className={`mb-6 rounded bg-gray-800 p-4 ${dragOver ? 'border-2 border-dashed border-blue-400' : 'border-2 border-transparent'}`}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-mono text-lg font-bold text-blue-400">
                 Loaded PDFs
@@ -335,6 +372,9 @@ export default function Dashboard() {
                   className="sr-only"
                 />
               </label>
+              <p className="w-full text-right font-mono text-xs text-gray-500">
+                or drag &amp; drop
+              </p>
             </div>
 
             {isLoading ? (
