@@ -8,17 +8,16 @@ A full-stack **Retrieval-Augmented Generation (RAG)** web application that allow
 
 ## Features
 
-- User authentication with JWT (register and login)
+- User authentication with JWT, username and password (register and login)
 - Upload and manage PDF documents
 - Ask questions about uploaded PDFs
-- Live streaming AI responses (typing animation)
+- Live streaming AI responses (AI response chunks)
 - List source citations used in context for AI response
 - Click a source citation to open the PDF at the relevant page
 - Select/deselect from multiple PDFs to add/remove context for the LLM to read
 - Chat history with the ability to revisit and re-ask questions
 - Delete PDFs and chat history entries
-- Drag-and-drop PDF upload
-- Per-user request usage tracking (300 requests per day limit with visual indicator)
+- Per-user request usage tracking
 - Mobile responsive layout with collapsible sidebar
 
 ---
@@ -37,7 +36,7 @@ A full-stack **Retrieval-Augmented Generation (RAG)** web application that allow
 
 ### Frontend
 - **React (TypeScript)**
-- **Tailwind CSS**
+- **Tailwind CSS** - Styling
 - **React Markdown** – formatted AI responses
 - **React PDF** – in-browser PDF viewer
 - **Vite** – development server and build tool
@@ -48,7 +47,7 @@ A full-stack **Retrieval-Augmented Generation (RAG)** web application that allow
 
 ---
 
-## Installation
+## Installation (for development)
 
 ### Prerequisites
 
