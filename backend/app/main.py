@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from uuid import uuid4
 
@@ -52,10 +53,11 @@ app = FastAPI(title="PDF RAG API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
+    allow_origins=[o for o in [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-    ],
+        os.getenv("FRONTEND_URL"),
+    ] if o],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -411,4 +413,5 @@ def ask_question_stream(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
