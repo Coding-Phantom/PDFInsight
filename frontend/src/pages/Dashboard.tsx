@@ -195,7 +195,7 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <aside className={`${sidebarOpen ? 'flex' : 'hidden'} md:flex fixed md:static inset-y-0 left-0 z-40 w-72 shrink-0 flex-col border-r border-gray-700 bg-gray-900`}>
+      <aside className={`${sidebarOpen ? 'flex' : 'hidden'} fixed md:static inset-y-0 left-0 z-40 w-72 shrink-0 flex-col border-r border-gray-700 bg-gray-900`}>
         <div className="flex flex-col items-center border-b border-gray-700 p-4">
           <img
             src="/PDFInsight.png"
@@ -265,10 +265,10 @@ export default function Dashboard() {
       <main className="flex flex-1 flex-col overflow-y-auto p-6">
         <div className="mx-auto w-full max-w-3xl">
           <button
-            className="mb-4 md:hidden rounded border border-gray-600 px-3 py-1 font-mono text-sm text-gray-400 hover:bg-gray-800"
-            onClick={() => setSidebarOpen(true)}
+            className="mb-4 rounded border border-gray-600 px-3 py-1 font-mono text-sm text-gray-400 hover:bg-gray-800"
+            onClick={() => setSidebarOpen((prev) => !prev)}
           >
-            ☰ Menu
+            {sidebarOpen ? '✕ Close' : '☰ Menu'}
           </button>
 
           {error ? (
