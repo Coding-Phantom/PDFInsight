@@ -53,11 +53,11 @@ app = FastAPI(title="PDF RAG API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
+    allow_origins=[o for o in [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        os.getenv("FRONTEND_URL", ""),
-    ],
+        os.getenv("FRONTEND_URL"),
+    ] if o],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
