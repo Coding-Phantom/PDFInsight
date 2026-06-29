@@ -4,11 +4,14 @@ from pathlib import Path
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import uvicorn
 
 # database imports
@@ -50,6 +53,19 @@ load_dotenv(BACKEND_DIR / ".env") # load api / secrets
 initialize_database(DB_PATH) # load database
 
 app = FastAPI(title="PDF RAG API")
+
+# Rate limiter — protects login/register from brute force
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+# Custom handler so the response uses "detail" (matching the frontend's parseResponse)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"Rate limit exceeded. Please wait before trying again."},
+    )
+
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -133,7 +149,8 @@ def health() -> dict[str, str]:
 
 
 @app.post("/register")
-def register(body: RegisterRequest) -> dict[str, str]:
+@limiter.limit("5/minute")
+def register(request: Request, body: RegisterRequest) -> dict[str, str]:
 
     # user inputs username and password
     username = body.username.strip()
@@ -143,9 +160,13 @@ def register(body: RegisterRequest) -> dict[str, str]:
     if not username or not password:
         raise HTTPException(status_code=400, detail="Username and password are required")
 
-    # no dupe usernames
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+
+    # Use a generic message whether the username exists or not,
+    # to prevent attackers from probing which usernames are taken.
     if get_user_by_username(DB_PATH, username) is not None:
-        raise HTTPException(status_code=400, detail="Username already taken")
+        raise HTTPException(status_code=400, detail="Could not create account")
 
     # hash password and create user to database
     hashed = hash_password(password)
@@ -154,7 +175,8 @@ def register(body: RegisterRequest) -> dict[str, str]:
 
 
 @app.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest) -> TokenResponse:
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginRequest) -> TokenResponse:
 
     # user inputs username and password, check if in db
     username = body.username.strip()
@@ -228,6 +250,13 @@ async def upload_pdf(
             delete_pdf_from_chroma(CHROMA_DIR, pdf_id)
         except Exception:
             pass
+
+        # File too large
+        if "exceeds the maximum" in str(error):
+            raise HTTPException(
+                status_code=400,
+                detail=str(error),
+            ) from error
 
         raise HTTPException(
             status_code=500,
