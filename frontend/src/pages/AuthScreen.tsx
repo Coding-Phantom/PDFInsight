@@ -13,9 +13,15 @@ export default function AuthScreen() {
     event.preventDefault()
     setError('')
 
-    if (isRegister && confirmPassword !== password) {
-      setError('Passwords do not match')
-      return
+    if (isRegister) {
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters')
+        return
+      }
+      if (confirmPassword !== password) {
+        setError('Passwords do not match')
+        return
+      }
     }
 
     setLoading(true)

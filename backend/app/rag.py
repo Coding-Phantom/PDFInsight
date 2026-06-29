@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 from langchain_community.document_loaders import PyPDFLoader
@@ -15,6 +16,12 @@ EMBEDDING_MODEL = "models/gemini-embedding-001"
 CHAT_MODEL = "gemini-2.5-flash"
 # CHAT_MODEL = "gemini-2.5-flash"
 # CHAT_MODEL = "gemini-3.5-flash" 
+
+# --- Rate-limit safety constants ---
+# Free tier: 100 embedding requests/minute. Keep batches well under that.
+BATCH_SIZE = 40
+BATCH_DELAY_SECONDS = 1.5
+MAX_CHUNKS_PER_PDF = 200
 
 
 def load_and_split_pdf(pdf_path: str | Path) -> list[Document]:
@@ -51,17 +58,36 @@ def index_pdf_in_chroma(
     path = Path(pdf_path)
     chunks = load_and_split_pdf(path)
 
+    if len(chunks) > MAX_CHUNKS_PER_PDF:
+        raise ValueError(
+            f"PDF has {len(chunks)} chunks, which exceeds the maximum of {MAX_CHUNKS_PER_PDF}. "
+            f"The PDF is too large for the free-tier embedding rate limit. "
+            f"Please try a shorter PDF."
+        )
+
     for chunk in chunks:
         chunk.metadata["pdf_id"] = pdf_id
         chunk.metadata["filename"] = display_filename or path.name
 
     vector_store = get_vector_store(persist_directory)
 
-    chunk_ids = [f"{pdf_id}-chunk-{index}" for index in range(len(chunks))]
-    vector_store.add_documents(chunks, ids=chunk_ids)
-    
+    # Add documents in batches to avoid hitting the free-tier rate limit
+    # (100 embedding requests/minute). Sleep briefly between batches.
+    total_indexed = 0
+    for batch_start in range(0, len(chunks), BATCH_SIZE):
+        batch = chunks[batch_start:batch_start + BATCH_SIZE]
+        batch_ids = [
+            f"{pdf_id}-chunk-{idx}"
+            for idx in range(batch_start, batch_start + len(batch))
+        ]
+        vector_store.add_documents(batch, ids=batch_ids)
+        total_indexed += len(batch)
 
-    return len(chunks)
+        # Don't sleep after the very last batch
+        if batch_start + BATCH_SIZE < len(chunks):
+            time.sleep(BATCH_DELAY_SECONDS)
+
+    return total_indexed
 
 
 def delete_pdf_from_chroma(persist_directory: str | Path, pdf_id: str) -> None:

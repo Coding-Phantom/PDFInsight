@@ -84,7 +84,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => null)
 
   if (!response.ok) {
-    const message = data?.detail ?? 'Something went wrong'
+    const message = data?.detail ?? data?.error ?? 'Something went wrong'
     throw new Error(message)
   }
 
